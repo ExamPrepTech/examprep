@@ -8,11 +8,13 @@ const createSubjectSchema = z.object({
   title: z.string().min(1, 'Title is required').trim(),
   spaceId: z.string().min(1, 'Space ID is required'),
   position: z.number().optional(),
+  icon: z.string().optional(),
 });
 
 const updateSubjectSchema = z.object({
   title: z.string().min(1, 'Title is required').optional(),
   position: z.number().optional(),
+  icon: z.string().optional(),
 });
 
 export class SubjectController {

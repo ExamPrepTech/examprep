@@ -8,6 +8,7 @@ import { Card } from '@/components/common/Card';
 import { Modal } from '@/components/common/Modal';
 import { EmptyState } from '@/components/common/EmptyState';
 import { DynamicIcon, getDeterministicColor } from '@/components/UI/DynamicIcon';
+import { IconPicker } from '@/components/UI/IconPicker';
 import { TruncatedText } from '@/components/common/TruncatedText';
 
 export default function SpaceList() {
@@ -20,7 +21,7 @@ export default function SpaceList() {
   const [currentSpace, setCurrentSpace] = useState<Space | null>(null);
 
   // Form states
-  const [formData, setFormData] = useState({ name: '', description: '' });
+  const [formData, setFormData] = useState({ name: '', description: '', icon: 'Book' });
   const createDescriptionRef = useRef<HTMLTextAreaElement>(null);
 
   const editDescriptionRef = useRef<HTMLTextAreaElement>(null);
@@ -59,14 +60,14 @@ export default function SpaceList() {
   };
 
   const openCreateModal = () => {
-    setFormData({ name: '', description: '' });
+    setFormData({ name: '', description: '', icon: 'Book' });
     setIsCreateModalOpen(true);
   };
 
   const openEditModal = (space: Space, e: React.MouseEvent) => {
     e.stopPropagation();
     setCurrentSpace(space);
-    setFormData({ name: space.name, description: space.description || '' });
+    setFormData({ name: space.name, description: space.description || '', icon: space.icon || 'Book' });
     setIsEditModalOpen(true);
   };
 
@@ -238,6 +239,10 @@ export default function SpaceList() {
               }}
             />
           </div>
+          <IconPicker
+            selected={formData.icon}
+            onSelect={(icon) => setFormData({ ...formData, icon })}
+          />
         </div>
       </Modal>
 
@@ -287,6 +292,10 @@ export default function SpaceList() {
               }}
             />
           </div>
+          <IconPicker
+            selected={formData.icon}
+            onSelect={(icon) => setFormData({ ...formData, icon })}
+          />
         </div>
       </Modal>
 

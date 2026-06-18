@@ -12,6 +12,7 @@ import { Modal } from '@/components/common/Modal';
 import { EmptyState } from '@/components/common/EmptyState';
 import { Breadcrumbs } from '@/components/common/Breadcrumbs';
 import { DynamicIcon, getDeterministicColor } from '@/components/UI/DynamicIcon';
+import { IconPicker } from '@/components/UI/IconPicker';
 import { TruncatedText } from '@/components/common/TruncatedText';
 
 export default function TopicList() {
@@ -44,7 +45,7 @@ export default function TopicList() {
 
   const [isCreating, setIsCreating] = useState(false);
 
-  const [formData, setFormData] = useState({ title: '' });
+  const [formData, setFormData] = useState({ title: '', icon: 'Hash' });
 
   // Initial load
   useEffect(() => {
@@ -65,7 +66,7 @@ export default function TopicList() {
     if (!subjectSlug) return;
     setIsCreating(true);
     try {
-      await createTopic(subjectSlug, formData.title);
+      await createTopic(subjectSlug, formData.title, formData.icon);
       closeModals();
     } catch (err) {
       console.error(err);
@@ -77,7 +78,7 @@ export default function TopicList() {
   const handleUpdate = async () => {
     if (!targetTopic) return;
     try {
-      await updateTopic(targetTopic._id, formData.title);
+      await updateTopic(targetTopic._id, formData.title, formData.icon);
       closeModals();
     } catch (err) {
       console.error(err);
@@ -95,14 +96,14 @@ export default function TopicList() {
   };
 
   const openCreateModal = () => {
-    setFormData({ title: '' });
+    setFormData({ title: '', icon: 'Hash' });
     setIsCreateModalOpen(true);
   };
 
   const openEditModal = (topic: Topic, e: React.MouseEvent) => {
     e.stopPropagation();
     setTargetTopic(topic);
-    setFormData({ title: topic.title });
+    setFormData({ title: topic.title, icon: topic.icon || 'Hash' });
     setIsEditModalOpen(true);
   };
 
@@ -256,6 +257,12 @@ export default function TopicList() {
             autoFocus
           />
         </div>
+        <div className="mt-4">
+          <IconPicker
+            selected={formData.icon}
+            onSelect={(icon) => setFormData({ ...formData, icon })}
+          />
+        </div>
       </Modal>
 
       <Modal
@@ -283,6 +290,12 @@ export default function TopicList() {
                 handleUpdate();
               }
             }}
+          />
+        </div>
+        <div className="mt-4">
+          <IconPicker
+            selected={formData.icon}
+            onSelect={(icon) => setFormData({ ...formData, icon })}
           />
         </div>
       </Modal>

@@ -8,11 +8,13 @@ import type { IUser } from '@/models/User.ts';
 const createSpaceSchema = z.object({
   name: z.string().min(1, 'Name is required').trim(),
   description: z.string().optional(),
+  icon: z.string().optional(),
 });
 
 const updateSpaceSchema = z.object({
   name: z.string().min(1, 'Name is required').optional(),
   description: z.string().optional(),
+  icon: z.string().optional(),
 });
 
 export class SpaceController {

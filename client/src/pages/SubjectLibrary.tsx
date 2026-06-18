@@ -9,6 +9,7 @@ import { Modal } from '@/components/common/Modal';
 import { EmptyState } from '@/components/common/EmptyState';
 import { Breadcrumbs } from '@/components/common/Breadcrumbs';
 import { DynamicIcon, getDeterministicColor } from '@/components/UI/DynamicIcon';
+import { IconPicker } from '@/components/UI/IconPicker';
 import { TruncatedText } from '@/components/common/TruncatedText';
 
 export default function SubjectLibrary() {
@@ -28,7 +29,7 @@ export default function SubjectLibrary() {
 
 
 
-  const [formData, setFormData] = useState({ title: '' });
+  const [formData, setFormData] = useState({ title: '', icon: 'Book' });
 
 
   useEffect(() => {
@@ -42,7 +43,7 @@ export default function SubjectLibrary() {
     if (!spaceSlug) return;
     setIsCreating(true);
     try {
-      await createSubject(spaceSlug, formData.title);
+      await createSubject(spaceSlug, formData.title, formData.icon);
       closeModals();
     } catch (err) {
       console.error(err);
@@ -54,7 +55,7 @@ export default function SubjectLibrary() {
   const handleUpdate = async () => {
     if (!targetSubject) return;
     try {
-      await updateSubject(targetSubject._id, formData.title);
+      await updateSubject(targetSubject._id, formData.title, formData.icon);
       closeModals();
     } catch (err) {
       console.error(err);
@@ -72,14 +73,14 @@ export default function SubjectLibrary() {
   };
 
   const openCreateModal = () => {
-    setFormData({ title: '' });
+    setFormData({ title: '', icon: 'Book' });
     setIsCreateModalOpen(true);
   };
 
   const openEditModal = (subject: Subject, e: React.MouseEvent) => {
     e.stopPropagation();
     setTargetSubject(subject);
-    setFormData({ title: subject.title });
+    setFormData({ title: subject.title, icon: subject.icon || 'Book' });
     setIsEditModalOpen(true);
   };
 
@@ -243,6 +244,12 @@ export default function SubjectLibrary() {
               />
             </div>
           </div>
+          <div className="mt-4">
+            <IconPicker
+              selected={formData.icon}
+              onSelect={(icon) => setFormData({ ...formData, icon })}
+            />
+          </div>
         </div>
       </Modal>
 
@@ -275,6 +282,12 @@ export default function SubjectLibrary() {
                 }}
               />
             </div>
+          </div>
+          <div className="mt-4">
+            <IconPicker
+              selected={formData.icon}
+              onSelect={(icon) => setFormData({ ...formData, icon })}
+            />
           </div>
         </div>
       </Modal>

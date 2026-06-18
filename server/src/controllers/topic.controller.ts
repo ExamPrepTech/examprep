@@ -8,11 +8,13 @@ const createTopicSchema = z.object({
   title: z.string().min(1, 'Title is required').trim(),
   subjectId: z.string().min(1, 'Subject ID is required'),
   position: z.number().optional(),
+  icon: z.string().optional(),
 });
 
 const updateTopicSchema = z.object({
   title: z.string().min(1, 'Title is required').optional(),
   position: z.number().optional(),
+  icon: z.string().optional(),
 });
 
 export class TopicController {

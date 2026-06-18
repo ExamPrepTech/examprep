@@ -58,7 +58,7 @@ const AppContent = () => {
   const isTestScreen = /^\/tests\/[^/]+$/.test(location.pathname);
   
   return (
-    <div className="min-h-screen bg-background text-foreground font-sans antialiased">
+    <div className="min-h-screen bg-background text-foreground antialiased">
       {!isTestScreen && <Navbar />}
       <Routes>
         <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />

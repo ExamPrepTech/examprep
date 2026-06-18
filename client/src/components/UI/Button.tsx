@@ -1,67 +1,64 @@
 import React from 'react';
+import { Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
+type Variant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'destructive' | 'icon';
+type Size = 'sm' | 'md' | 'lg' | 'icon';
+
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'outline' | 'ghost';
-  size?: 'default' | 'sm' | 'lg' | 'icon';
+  variant?: Variant;
+  size?: Size;
   isLoading?: boolean;
 }
 
-export const Button = ({
-  className,
-  variant = 'primary',
-  size = 'default',
-  isLoading,
-  children,
-  ...props
-}: ButtonProps) => {
-  const variants = {
-    primary: 'bg-primary text-background hover:opacity-90',
-    outline: 'border border-border bg-transparent hover:bg-secondary',
-    ghost: 'bg-transparent hover:bg-secondary',
-  };
-
-  const sizes = {
-    default: 'h-10 px-4 py-2',
-    sm: 'h-9 px-3',
-    lg: 'h-11 px-8',
-    icon: 'h-10 w-10',
-  };
-
-  return (
-    <button
-      className={cn(
-        'inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50',
-        variants[variant],
-        sizes[size],
-        className
-      )}
-      disabled={isLoading}
-      {...props}
-    >
-      {isLoading ? (
-        <svg
-          className="mr-2 h-4 w-4 animate-spin"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-        >
-          <circle
-            className="opacity-25"
-            cx="12"
-            cy="12"
-            r="10"
-            stroke="currentColor"
-            strokeWidth="4"
-          ></circle>
-          <path
-            className="opacity-75"
-            fill="currentColor"
-            d="4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-          ></path>
-        </svg>
-      ) : null}
-      {children}
-    </button>
-  );
+const variantClass: Record<Variant, string> = {
+  primary:
+    'bg-copper text-bone border border-copper hover:shadow-[inset_0_0_0_1px_var(--ink)]',
+  secondary:
+    'bg-background text-foreground border border-iron hover:bg-muted',
+  outline:
+    'bg-transparent text-foreground border border-border hover:border-iron hover:bg-muted',
+  ghost:
+    'bg-transparent text-foreground border border-transparent hover:underline underline-offset-[6px] decoration-copper decoration-2',
+  destructive:
+    'bg-transparent text-bruise border border-bruise hover:bg-bruise hover:text-bone',
+  icon:
+    'bg-transparent text-iron border border-transparent hover:text-foreground hover:bg-muted',
 };
+
+const sizeClass: Record<Size, string> = {
+  sm: 'h-8 px-3 text-xs',
+  md: 'h-10 px-4 text-sm',
+  lg: 'h-12 px-6 text-base',
+  icon: 'h-9 w-9',
+};
+
+export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  (
+    { className, variant = 'primary', size, isLoading, children, disabled, type = 'button', ...props },
+    ref,
+  ) => {
+    const resolvedSize: Size = size ?? (variant === 'icon' ? 'icon' : 'md');
+    return (
+      <button
+        ref={ref}
+        type={type}
+        disabled={disabled || isLoading}
+        className={cn(
+          'inline-flex items-center justify-center gap-2 font-mono uppercase tracking-wide text-[0.78rem] transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none',
+          variantClass[variant],
+          sizeClass[resolvedSize],
+          className,
+        )}
+        style={{ borderRadius: 2 }}
+        {...props}
+      >
+        {isLoading && <Loader2 className="animate-spin" size={14} />}
+        {children}
+      </button>
+    );
+  },
+);
+Button.displayName = 'Button';
+
+export default Button;
