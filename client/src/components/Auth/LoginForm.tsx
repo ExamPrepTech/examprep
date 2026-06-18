@@ -67,11 +67,7 @@ export const LoginForm = () => {
           required
         />
         {error && (
-          <div className={`p-3 rounded-lg text-sm ${
-            error.includes('Pending Approval') 
-              ? 'bg-warning/15 text-warning border border-warning/20' 
-              : 'bg-destructive/15 text-destructive border border-destructive/20'
-          }`}>
+          <div className="p-3 rounded-lg text-sm bg-destructive/15 text-destructive border border-destructive/20">
             {error}
           </div>
         )}

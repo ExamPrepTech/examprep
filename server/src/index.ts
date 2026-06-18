@@ -11,7 +11,6 @@ import morgan from 'morgan';
 import '@/config/passport.ts';
 import authRoutes from '@/routes/auth.routes.ts';
 import contentRoutes from '@/routes/content.routes.ts';
-import adminRoutes from '@/routes/admin.routes.ts';
 import { ENV } from '@/config/env.ts';
 import { mailService } from '@/services/mail/mail.service.ts';
 
@@ -35,7 +34,6 @@ import testRoutes from '@/routes/test.routes.js';
 app.use('/api/auth', authRoutes);
 app.use('/api', contentRoutes);
 app.use('/api/tests', testRoutes);
-app.use('/api/admin', adminRoutes);
 
 // Error Handling
 import { errorHandler } from '@/middleware/error.middleware.ts';

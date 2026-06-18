@@ -12,8 +12,7 @@ import ResetPasswordPage from '@/pages/ResetPasswordPage';
 import { AuthSuccess } from '@/pages/AuthSuccess';
 import TestDashboard from '@/pages/TestDashboard';
 import TestScreen from '@/pages/TestScreen';
-import AdminPage from '@/pages/AdminPage';
-import PendingApprovalPage from '@/pages/PendingApprovalPage';
+
 import { Navbar } from '@/components/common/Navbar';
 import { GlobalPrompt } from '@/components/common/GlobalPrompt';
 import { Toaster } from 'react-hot-toast';
@@ -35,15 +34,11 @@ const TitleUpdater = () => {
 };
 
 const RequireAuth = ({ children }: { children: ReactNode }) => {
-  const { isAuthenticated, user } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   const location = useLocation();
 
   if (!isAuthenticated) {
     return <Navigate to="/login" state={{ from: location }} replace />;
-  }
-
-  if (user && !user.isApproved && user.role !== 'admin') {
-      return <Navigate to="/pending-approval" replace />;
   }
 
   return children;
@@ -61,20 +56,16 @@ const AppContent = () => {
   const location = useLocation();
   // Check if the current path matches /tests/:id (but not /tests dashboard)
   const isTestScreen = /^\/tests\/[^/]+$/.test(location.pathname);
-  const isPendingPage = location.pathname === '/pending-approval';
   
   return (
     <div className="min-h-screen bg-background text-foreground font-sans antialiased">
-      {!isTestScreen && !isPendingPage && <Navbar />}
+      {!isTestScreen && <Navbar />}
       <Routes>
         <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
         <Route path="/register" element={<PublicRoute><RegisterPage /></PublicRoute>} />
         <Route path="/forgot-password" element={<PublicRoute><ForgotPasswordPage /></PublicRoute>} />
         <Route path="/reset-password" element={<PublicRoute><ResetPasswordPage /></PublicRoute>} />
         <Route path="/auth-success" element={<AuthSuccess />} />
-        <Route path="/pending-approval" element={
-            useAuthStore.getState().isAuthenticated ? <PendingApprovalPage /> : <Navigate to="/login" />
-        } />
 
         <Route path="/" element={<Navigate to="/spaces" replace />} />
 
@@ -106,11 +97,6 @@ const AppContent = () => {
         <Route path="/tests/:id" element={
           <RequireAuth>
             <TestScreen />
-          </RequireAuth>
-        } />
-        <Route path="/admin" element={
-          <RequireAuth>
-             <AdminPage />
           </RequireAuth>
         } />
 

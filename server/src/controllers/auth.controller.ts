@@ -16,8 +16,6 @@ export class AuthController {
           id: (user as any)._id,
           name: (user as any).name,
           email: (user as any).email,
-          role: (user as any).role,
-          isApproved: (user as any).isApproved,
         },
       });
     } catch (err: any) {
@@ -34,11 +32,6 @@ export class AuthController {
       const { email, password } = req.body;
       const { user, token } = await AuthService.login(email, password);
 
-      if (!(user as any).isApproved) {
-        res.status(403).json({ message: 'Account Pending Approval' });
-        return;
-      }
-
       const userData = user.toObject() as any;
       res.status(200).json({
         token,
@@ -47,8 +40,6 @@ export class AuthController {
           name: userData.name,
           email: userData.email,
           avatar: userData.avatar,
-          role: userData.role,
-          isApproved: userData.isApproved,
         },
       });
     } catch (err: any) {
@@ -71,11 +62,6 @@ export class AuthController {
   static async googleCallback(req: Request, res: Response): Promise<void> {
     const user = req.user as IUser;
     const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:5173';
-
-    if (!(user as any).isApproved) {
-      res.redirect(`${CLIENT_URL}/login?error=Account%20Pending%20Approval`);
-      return;
-    }
 
     const token = AuthService.generateToken(user);
     res.redirect(`${CLIENT_URL}/auth-success?token=${token}`);

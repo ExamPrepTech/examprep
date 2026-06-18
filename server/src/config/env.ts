@@ -10,7 +10,6 @@ export const ENV = {
   PORT: process.env.PORT || 5001,
   MONGODB_URI: process.env.MONGODB_URI || 'mongodb://localhost:27017/examprep',
   CLIENT_URL: process.env.CLIENT_URL || 'http://localhost:5173',
-  ADMIN_EMAILS: (process.env.ADMIN_EMAIL || 'ganeshknsml@gmail.com').split(',').map(email => email.trim()),
   NODE_ENV: process.env.NODE_ENV || 'development',
   JWT_SECRET: process.env.JWT_SECRET || 'dev-only-insecure-secret',
   GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,

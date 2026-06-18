@@ -80,9 +80,7 @@ export function Navbar() {
             <div className="hidden md:flex items-center gap-1 mr-4">
               <NavLink to="/spaces">Spaces</NavLink>
               <NavLink to="/tests">Test Center</NavLink>
-              {user?.role === 'admin' && (
-                <NavLink to="/admin">Admin</NavLink>
-              )}
+
             </div>
           )}
           <Button
