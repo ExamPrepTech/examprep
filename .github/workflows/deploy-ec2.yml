@@ -1,0 +1,77 @@
+name: Deploy Server to EC2
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'server/**'
+      - 'shared/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+          package_json_file: server/package.json
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+          cache-dependency-path: server/pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: cd server && pnpm install --frozen-lockfile
+
+      - name: Build server
+        run: cd server && pnpm build
+
+      - name: Write .env on EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ vars.EC2_HOST }}
+          username: ${{ vars.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            mkdir -p ~/server
+            cat > ~/server/.env << 'EOF'
+            PORT=${{ vars.PORT || '5000' }}
+            NODE_ENV=production
+            MONGODB_URI=${{ secrets.MONGODB_URI }}
+            JWT_SECRET=${{ secrets.JWT_SECRET }}
+            CLIENT_URL=${{ vars.CLIENT_URL }}
+            API_URL=${{ vars.API_URL }}
+            GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
+            GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
+            SMTP_HOST=${{ secrets.SMTP_HOST }}
+            SMTP_PORT=${{ vars.SMTP_PORT || '587' }}
+            SMTP_USER=${{ secrets.SMTP_USER }}
+            SMTP_PASS=${{ secrets.SMTP_PASS }}
+            EMAIL_FROM=${{ vars.EMAIL_FROM }}
+            EOF
+
+      - name: Sync files to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ vars.EC2_HOST }}
+          username: ${{ vars.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: "server/dist/,server/package.json,server/pnpm-lock.yaml"
+          target: "~"
+          strip_components: 0
+
+      - name: Restart server on EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ vars.EC2_HOST }}
+          username: ${{ vars.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd ~/server
+            pnpm install --prod --frozen-lockfile 2>/dev/null || true
+            pm2 start dist/index.js --name server --env production 2>/dev/null || pm2 restart server
+            pm2 save
