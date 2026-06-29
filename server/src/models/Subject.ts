@@ -8,6 +8,7 @@ export interface ISubject extends Document {
   title: string;
   slug: string;
   spaceId: mongoose.Types.ObjectId;
+  userId: mongoose.Types.ObjectId;
   position: number;
   topicCount: number;
   questionCount: number;
@@ -20,11 +21,14 @@ const SubjectSchema: Schema = new Schema({
   title: { type: String, required: true },
   slug: { type: String, required: true, index: true },
   spaceId: { type: Schema.Types.ObjectId, ref: 'Space', required: true, index: true },
+  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
   position: { type: Number, default: 0 },
   topicCount: { type: Number, default: 0 },
   questionCount: { type: Number, default: 0 },
   icon: { type: String, default: 'Book' }
 }, { timestamps: true });
+
+SubjectSchema.index({ userId: 1, spaceId: 1 });
 
 SubjectSchema.pre("validate", async function () {
   if (this.isModified("title") || !this.slug) {

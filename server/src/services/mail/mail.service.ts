@@ -7,7 +7,7 @@
  * caller stay unchanged.
  */
 import nodemailer, { type Transporter } from 'nodemailer';
-import { ENV, isEmailConfigured } from '@/config/env.ts';
+import { ENV, isEmailConfigured } from '@/config/environment.ts';
 import type { MailMessage } from '@/services/mail/types.ts';
 
 let transporter: Transporter | null = null;

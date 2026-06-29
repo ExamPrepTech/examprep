@@ -7,6 +7,7 @@ import type { IContentBlock } from '@/models/ContentBlock.js';
 import { ContentBlockType } from '@/models/ContentBlock.js';
 import Subject from '@/models/Subject.js';
 import Topic from '@/models/Topic.js';
+import { PermissionService } from '@/services/permission.service.ts';
 
 export class TestService {
   /**
@@ -163,17 +164,27 @@ export class TestService {
   }
 
   /**
-   * Get test by ID (verify ownership)
+   * Get test by ID (verify access)
    */
   async getTestById(testId: string, userId: string): Promise<ITest | null> {
-    return await Test.findOne({ _id: testId, userId });
+    const test = await Test.findById(testId);
+    if (!test) return null;
+    const hasAccess = await PermissionService.hasAccess(userId, 'test', test._id.toString());
+    if (!hasAccess) return null;
+    return test;
   }
 
   /**
-   * Get all tests for a user
+   * Get all tests for a user (owned + shared)
    */
   async getTestsByUser(userId: string): Promise<ITest[]> {
-    return await Test.find({ userId }).sort({ createdAt: -1 });
+    const sharedIds = await PermissionService.getSharedResourceIds(userId, 'test');
+    return await Test.find({
+      $or: [
+        { userId },
+        { _id: { $in: sharedIds } },
+      ],
+    }).sort({ createdAt: -1 });
   }
 
   /**

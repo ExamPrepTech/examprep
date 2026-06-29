@@ -29,7 +29,7 @@ export class ContentService {
       data.position = count;
     }
 
-    const block = new ContentBlock({ ...data, topicId: topicId });
+    const block = new ContentBlock({ ...data, topicId: topicId, userId });
     const savedBlock = await block.save();
     // Increment Subject questionCount if this block is a question
     const questionKinds = ['single_select_mcq', 'multi_select_mcq', 'descriptive', 'fill_in_the_blank'];
@@ -116,26 +116,20 @@ export class ContentService {
     return { blocks: data, nextCursor };
   }
 
+  static async checkOwnership(userId: string, blockId: string): Promise<boolean> {
+    const count = await ContentBlock.countDocuments({ _id: blockId, userId });
+    return count > 0;
+  }
+
   static async update(userId: string, blockId: string, data: Partial<IContentBlock>): Promise<IContentBlock | null> {
-    const block = await ContentBlock.findById(blockId);
-    if (!block) return null;
-
-    const hasAccess = await TopicService.checkOwnership(userId, block.topicId.toString());
-    if (!hasAccess) {
-      throw new Error('Access denied');
-    }
-
+    const hasAccess = await this.checkOwnership(userId, blockId);
+    if (!hasAccess) throw new Error('Access denied');
     return await ContentBlock.findByIdAndUpdate(blockId, data, { new: true });
   }
 
   static async delete(userId: string, blockId: string): Promise<IContentBlock | null> {
-    const block = await ContentBlock.findById(blockId);
-    if (!block) return null;
-
-    const hasAccess = await TopicService.checkOwnership(userId, block.topicId.toString());
-    if (!hasAccess) {
-      throw new Error('Access denied');
-    }
+    const hasAccess = await this.checkOwnership(userId, blockId);
+    if (!hasAccess) throw new Error('Access denied');
 
     const deletedBlock = await ContentBlock.findByIdAndDelete(blockId);
 
@@ -174,6 +168,7 @@ export class ContentService {
       return {
         ...data,
         topicId: topicId,
+        userId,
         position: currentCount + index,
       };
     });

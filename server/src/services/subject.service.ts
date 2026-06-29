@@ -3,6 +3,7 @@ import Space from '@/models/Space.ts';
 import Topic from '@/models/Topic.ts';
 import ContentBlock from '@/models/ContentBlock.ts';
 import { SpaceService } from '@/services/space.service.ts';
+import { PermissionService } from '@/services/permission.service.ts';
 import { Types } from 'mongoose';
 
 export class SubjectService {
@@ -30,7 +31,7 @@ export class SubjectService {
       data.position = count;
     }
 
-    const subject = new Subject({ ...data, spaceId: spaceId });
+    const subject = new Subject({ ...data, spaceId: spaceId, userId });
     const savedSubject = await subject.save();
 
     await Space.findByIdAndUpdate(spaceId, { $inc: { subjectCount: 1 } });
@@ -66,14 +67,10 @@ export class SubjectService {
     const query = Types.ObjectId.isValid(identifier)
       ? { _id: identifier }
       : { slug: identifier };
-
-    const subject = await Subject.findOne(query);
+    const subject = await Subject.findOne(query, '_id title spaceId position slug topicCount questionCount icon');
     if (!subject) return null;
-
-    const hasAccess = await SpaceService.checkOwnership(userId, subject.spaceId.toString());
-    if (!hasAccess) {
-      throw new Error('Access denied');
-    }
+    const hasAccess = await PermissionService.hasAccess(userId, 'subject', subject._id.toString());
+    if (!hasAccess) return null;
     return subject;
   }
 
@@ -120,10 +117,9 @@ export class SubjectService {
 
   static async checkOwnership(userId: string, identifier: string): Promise<boolean> {
     const query = Types.ObjectId.isValid(identifier)
-      ? { _id: identifier }
-      : { slug: identifier };
-    const subject = await Subject.findOne(query);
-    if (!subject) return false;
-    return await SpaceService.checkOwnership(userId, subject.spaceId.toString());
+      ? { _id: identifier, userId }
+      : { slug: identifier, userId };
+    const count = await Subject.countDocuments(query);
+    return count > 0;
   }
 }

@@ -10,9 +10,10 @@ interface TopicContentAreaProps {
   selectedBlock: ContentBlock | undefined;
   onEdit: (block: ContentBlock) => void;
   onDelete: (id: string) => void;
+  isOwner: boolean;
 }
 
-export function TopicContentArea({ selectedBlock, onEdit, onDelete }: TopicContentAreaProps) {
+export function TopicContentArea({ selectedBlock, onEdit, onDelete, isOwner }: TopicContentAreaProps) {
   const [isTagsModalOpen, setIsTagsModalOpen] = useState(false);
   
   const getBlockTypeLabel = (kind: ContentBlockType) => {
@@ -67,15 +68,17 @@ export function TopicContentArea({ selectedBlock, onEdit, onDelete }: TopicConte
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm" onClick={() => onEdit(selectedBlock)}>
-                      <Pencil className="h-3.5 w-3.5 mr-2" />
-                      Edit
-                    </Button>
-                    <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10 hover:text-destructive" onClick={() => onDelete(selectedBlock._id)}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
+                  {isOwner && (
+                    <div className="flex items-center gap-2">
+                      <Button variant="outline" size="sm" onClick={() => onEdit(selectedBlock)}>
+                        <Pencil className="h-3.5 w-3.5 mr-2" />
+                        Edit
+                      </Button>
+                      <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10 hover:text-destructive" onClick={() => onDelete(selectedBlock._id)}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  )}
                 </div>
 
                 {selectedBlock.tags && selectedBlock.tags.length > 0 && (

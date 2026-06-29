@@ -9,24 +9,26 @@ export enum ContentBlockType {
 
 export interface IContentBlock extends Document {
   topicId: mongoose.Types.ObjectId;
+  userId: mongoose.Types.ObjectId;
   position: number;
   kind: ContentBlockType;
-  content?: string; // For note
-  question?: string; // For mcqs/descriptive
+  content?: string;
+  question?: string;
   explanation?: string;
   notes?: string;
   tags?: string[];
   group?: string;
   blankAnswers?: string[];
   hints?: string[];
-  options?: Array<{ id: string; text: string; isCorrect: boolean }>; // For mcqs
-  imageUrl?: string; // Optional question image (external URL)
+  options?: Array<{ id: string; text: string; isCorrect: boolean }>;
+  imageUrl?: string;
   createdAt: Date;
   updatedAt: Date;
 }
 
 const ContentBlockSchema: Schema = new Schema({
   topicId: { type: Schema.Types.ObjectId, ref: 'Topic', required: true, index: true },
+  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
   position: { type: Number, default: 0 },
   kind: {
     type: String,
@@ -52,5 +54,6 @@ const ContentBlockSchema: Schema = new Schema({
 }, { timestamps: true });
 
 ContentBlockSchema.index({ topicId: 1 });
+ContentBlockSchema.index({ userId: 1, topicId: 1 });
 
 export default mongoose.model<IContentBlock>('ContentBlock', ContentBlockSchema);

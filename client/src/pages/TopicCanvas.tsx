@@ -11,6 +11,7 @@ import { TopicSidebar } from '@/components/topic-canvas/TopicSidebar';
 import { TopicContentArea } from '@/components/topic-canvas/TopicContentArea';
 import { MultiSelect } from '@/components/common/MultiSelect';
 import { BulkUploadModal } from '@/components/content-blocks/BulkUploadModal';
+import { ShareDialog } from '@/components/common/ShareDialog';
 
 
 export default function TopicCanvas() {
@@ -47,6 +48,7 @@ export default function TopicCanvas() {
 
   // UI State
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
+  const [isShareOpen, setIsShareOpen] = useState(false);
   const [activeTypeFilters, setActiveTypeFilters] = useState<ContentBlockType[]>([]);
   const [activeTagFilters, setActiveTagFilters] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -207,9 +209,11 @@ export default function TopicCanvas() {
         topicTitle={currentTopic?.title}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
+        isOwner={currentSpace?.isOwner !== false}
         isFilterActive={activeTypeFilters.length > 0 || activeTagFilters.length > 0}
         onOpenFilter={() => setIsFilterDialogOpen(true)}
         onAddBlock={handleAddBlockClick as any}
+        onShare={() => setIsShareOpen(true)}
         blocks={blocks}
         selectedBlockId={selectedBlockId}
         onSelectBlock={setSelectedBlockId}
@@ -222,6 +226,7 @@ export default function TopicCanvas() {
         selectedBlock={selectedBlock}
         onEdit={handleEditBlockClick}
         onDelete={handleDeleteBlock}
+        isOwner={currentSpace?.isOwner !== false}
       />
 
       <ContentBlockModal
@@ -239,6 +244,13 @@ export default function TopicCanvas() {
         topicId={currentTopic?._id || ''}
       />
 
+      <ShareDialog
+        isOpen={isShareOpen}
+        onClose={() => setIsShareOpen(false)}
+        resourceType="topic"
+        resourceId={currentTopic?._id || ''}
+        resourceTitle={currentTopic?.title}
+      />
 
       
       {/* Filter Modal */}

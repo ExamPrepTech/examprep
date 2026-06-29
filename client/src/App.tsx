@@ -12,6 +12,8 @@ import ResetPasswordPage from '@/pages/ResetPasswordPage';
 import { AuthSuccess } from '@/pages/AuthSuccess';
 import TestDashboard from '@/pages/TestDashboard';
 import TestScreen from '@/pages/TestScreen';
+import SharedWithMe from '@/pages/SharedWithMe';
+import SharedLinkPage from '@/pages/SharedLinkPage';
 
 import { Navbar } from '@/components/common/Navbar';
 import { GlobalPrompt } from '@/components/common/GlobalPrompt';
@@ -97,6 +99,16 @@ const AppContent = () => {
         <Route path="/tests/:id" element={
           <RequireAuth>
             <TestScreen />
+          </RequireAuth>
+        } />
+        <Route path="/shared-with-me" element={
+          <RequireAuth>
+            <SharedWithMe />
+          </RequireAuth>
+        } />
+        <Route path="/shared/:hash" element={
+          <RequireAuth>
+            <SharedLinkPage />
           </RequireAuth>
         } />
 

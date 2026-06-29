@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Search, Filter, Plus, Loader2, ChevronLeft } from 'lucide-react';
+import { Search, Filter, Plus, Loader2, ChevronLeft, Share2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/common/Button';
@@ -15,11 +15,13 @@ interface TopicSidebarProps {
 
   searchQuery: string;
   onSearchChange: (value: string) => void;
+  isOwner: boolean;
 
   isFilterActive: boolean;
   onOpenFilter: () => void;
 
   onAddBlock: (type: ContentBlockType) => void;
+  onShare?: () => void;
 
   blocks: ContentBlock[];
   selectedBlockId: string | null;
@@ -35,9 +37,11 @@ export function TopicSidebar({
   topicTitle,
   searchQuery,
   onSearchChange,
+  isOwner,
   isFilterActive,
   onOpenFilter,
   onAddBlock,
+  onShare,
   blocks,
   selectedBlockId,
   onSelectBlock,
@@ -137,9 +141,16 @@ export function TopicSidebar({
              {spaceName} / {subjectTitle}
           </TruncatedText>
         </div>
-        <TruncatedText as="h2" className="font-bold text-xl">
-          {topicTitle || 'Topic'}
-        </TruncatedText>
+        <div className="flex items-center gap-2">
+          <TruncatedText as="h2" className="font-bold text-xl flex-1 min-w-0">
+            {topicTitle || 'Topic'}
+          </TruncatedText>
+          {isOwner && onShare && (
+            <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0" onClick={onShare}>
+              <Share2 className="h-3.5 w-3.5" />
+            </Button>
+          )}
+        </div>
 
         <div className="flex items-center gap-2">
           <div className="relative flex-1">
@@ -161,17 +172,18 @@ export function TopicSidebar({
             <Filter className="h-4 w-4" />
           </Button>
 
-          <div className="relative" ref={menuRef}>
-            <Button
-              size="icon"
-              className="h-8 w-8 shrink-0"
-              onClick={() => setIsAddMenuOpen(!isAddMenuOpen)}
-            >
-              <Plus className={cn("h-4 w-4 transition-transform duration-200", isAddMenuOpen && "rotate-45")} />
-            </Button>
+          {isOwner && (
+            <div className="relative" ref={menuRef}>
+              <Button
+                size="icon"
+                className="h-8 w-8 shrink-0"
+                onClick={() => setIsAddMenuOpen(!isAddMenuOpen)}
+              >
+                <Plus className={cn("h-4 w-4 transition-transform duration-200", isAddMenuOpen && "rotate-45")} />
+              </Button>
 
-            <AnimatePresence>
-              {isAddMenuOpen && (
+              <AnimatePresence>
+                {isAddMenuOpen && (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.95, y: 5 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -207,6 +219,7 @@ export function TopicSidebar({
               )}
             </AnimatePresence>
           </div>
+          )}
         </div>
       </div>
 

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Plus, Edit2, Trash2, Loader2 } from 'lucide-react';
+import { Plus, Edit2, Trash2, Loader2, Share2 } from 'lucide-react';
 import { type Subject } from '@/types/domain';
 import { useContentStore } from '@/store/contentStore';
 import { useSpaceStore } from '@/store/spaceStore';
@@ -11,6 +11,7 @@ import { Breadcrumbs } from '@/components/common/Breadcrumbs';
 import { DynamicIcon, getDeterministicColor } from '@/components/UI/DynamicIcon';
 import { IconPicker } from '@/components/UI/IconPicker';
 import { TruncatedText } from '@/components/common/TruncatedText';
+import { ShareDialog } from '@/components/common/ShareDialog';
 
 export default function SubjectLibrary() {
   const { spaceSlug } = useParams();
@@ -24,6 +25,7 @@ export default function SubjectLibrary() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [targetSubject, setTargetSubject] = useState<Subject | null>(null);
+  const [shareSubject, setShareSubject] = useState<Subject | null>(null);
 
   const [isCreating, setIsCreating] = useState(false);
 
@@ -128,10 +130,12 @@ export default function SubjectLibrary() {
                 {currentSpace?.name ? `${currentSpace.name} Library` : 'Library'}
               </TruncatedText>
             </div>
-            <Button onClick={openCreateModal}>
-              <Plus className="mr-2 h-4 w-4" />
-              Add Subject
-            </Button>
+            {currentSpace?.isOwner !== false && (
+              <Button onClick={openCreateModal}>
+                <Plus className="mr-2 h-4 w-4" />
+                Add Subject
+              </Button>
+            )}
           </div>
         </div>
       </div>
@@ -141,8 +145,8 @@ export default function SubjectLibrary() {
           {subjects.length === 0 ? (
             <EmptyState
               title="No subjects yet"
-              description="Create a subject to start adding topics."
-              action={<Button onClick={openCreateModal}>Add Subject</Button>}
+              description={currentSpace?.isOwner !== false ? "Create a subject to start adding topics." : "No subjects in this space yet."}
+              action={currentSpace?.isOwner !== false ? <Button onClick={openCreateModal}>Add Subject</Button> : undefined}
             />
           ) : (
             <div className="grid grid-cols-1 gap-6">
@@ -178,27 +182,38 @@ export default function SubjectLibrary() {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-                      <div className="flex items-center bg-secondary/50 rounded-lg">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={(e) => openEditModal(subject, e)}
-                          className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                        >
-                          <Edit2 className="h-4 w-4" />
-                        </Button>
-                        <div className="w-px h-4 bg-border" />
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-                          onClick={(e) => openDeleteModal(subject, e)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                    {currentSpace?.isOwner !== false && (
+                      <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                        <div className="flex items-center bg-secondary/50 rounded-lg">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={(e) => openEditModal(subject, e)}
+                            className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                          >
+                            <Edit2 className="h-4 w-4" />
+                          </Button>
+                          <div className="w-px h-4 bg-border" />
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                            onClick={(e) => { e.stopPropagation(); setShareSubject(subject); }}
+                          >
+                            <Share2 className="h-4 w-4" />
+                          </Button>
+                          <div className="w-px h-4 bg-border" />
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                            onClick={(e) => openDeleteModal(subject, e)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
-                    </div>
+                    )}
                   </div>
                   {/* Progress bar removed as per request "here no need of that progress" */}
                 </div>
@@ -313,6 +328,13 @@ export default function SubjectLibrary() {
         </p>
       </Modal>
 
+      <ShareDialog
+        isOpen={!!shareSubject}
+        onClose={() => setShareSubject(null)}
+        resourceType="subject"
+        resourceId={shareSubject?._id || ''}
+        resourceTitle={shareSubject?.title}
+      />
     </div >
   );
 }

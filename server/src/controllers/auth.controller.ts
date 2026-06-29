@@ -2,6 +2,7 @@
 import type { Request, Response } from 'express';
 import { AuthService } from '@/services/auth.service.ts';
 import type { IUser } from '@/models/User.ts';
+import { ENV } from '@/config/environment.ts';
 
 export class AuthController {
   
@@ -61,10 +62,8 @@ export class AuthController {
 
   static async googleCallback(req: Request, res: Response): Promise<void> {
     const user = req.user as IUser;
-    const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:5173';
-
     const token = AuthService.generateToken(user);
-    res.redirect(`${CLIENT_URL}/auth-success?token=${token}`);
+    res.redirect(`${ENV.CLIENT_URL}/auth-success?token=${token}`);
   }
   static async forgotPassword(req: Request, res: Response): Promise<void> {
     const { email } = req.body;

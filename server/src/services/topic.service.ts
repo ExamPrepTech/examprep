@@ -2,6 +2,7 @@ import Topic, { type ITopic } from '@/models/Topic.ts';
 import Subject from '@/models/Subject.ts';
 import ContentBlock from '@/models/ContentBlock.ts';
 import { SubjectService } from '@/services/subject.service.ts';
+import { PermissionService } from '@/services/permission.service.ts';
 import { Types } from 'mongoose';
 
 export class TopicService {
@@ -29,7 +30,7 @@ export class TopicService {
       data.position = count;
     }
 
-    const topic = new Topic({ ...data, subjectId: subjectId });
+    const topic = new Topic({ ...data, subjectId: subjectId, userId });
     const savedTopic = await topic.save();
     await Subject.findByIdAndUpdate(subjectId, { $inc: { topicCount: 1 } });
     return savedTopic;
@@ -73,51 +74,31 @@ export class TopicService {
       : { slug: identifier };
     const topic = await Topic.findOne(query);
     if (!topic) return null;
-
-    const hasAccess = await SubjectService.checkOwnership(userId, topic.subjectId.toString());
-    if (!hasAccess) {
-      throw new Error('Access denied');
-    }
+    const hasAccess = await PermissionService.hasAccess(userId, 'topic', topic._id.toString());
+    if (!hasAccess) return null;
     return topic;
   }
 
   static async update(userId: string, topicId: string, data: Partial<ITopic>): Promise<ITopic | null> {
-    const topic = await Topic.findById(topicId);
-    if (!topic) return null;
-
-    const hasAccess = await SubjectService.checkOwnership(userId, topic.subjectId.toString());
-    if (!hasAccess) {
-      throw new Error('Access denied');
-    }
-
+    const hasAccess = await this.checkOwnership(userId, topicId);
+    if (!hasAccess) throw new Error('Access denied');
     return await Topic.findByIdAndUpdate(topicId, data, { new: true });
   }
 
   static async delete(userId: string, topicId: string): Promise<ITopic | null> {
-    const topic = await Topic.findById(topicId);
-    if (!topic) return null;
-
-    const hasAccess = await SubjectService.checkOwnership(userId, topic.subjectId.toString());
-    if (!hasAccess) {
-      throw new Error('Access denied');
-    }
+    const hasAccess = await this.checkOwnership(userId, topicId);
+    if (!hasAccess) throw new Error('Access denied');
 
     await ContentBlock.deleteMany({ topicId: topicId });
-
-    // Delete the topic
     const deletedTopic = await Topic.findByIdAndDelete(topicId);
-    
-    // Update subject's topicCount
     if (deletedTopic) {
       await Subject.findByIdAndUpdate(deletedTopic.subjectId, { $inc: { topicCount: -1 } });
     }
-
     return deletedTopic;
   }
 
   static async checkOwnership(userId: string, topicId: string): Promise<boolean> {
-    const topic = await Topic.findOne({ _id: topicId });
-    if (!topic) return false;
-    return await SubjectService.checkOwnership(userId, topic.subjectId.toString());
+    const count = await Topic.countDocuments({ _id: topicId, userId });
+    return count > 0;
   }
 }

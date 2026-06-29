@@ -4,7 +4,7 @@ import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
 import User, { type IUser } from '@/models/User.ts';
 import { v4 as uuidv4 } from 'uuid';
-import { ENV } from '@/config/env.ts';
+import { ENV } from '@/config/environment.ts';
 import { mailService } from '@/services/mail/mail.service.ts';
 import { passwordResetTemplate } from '@/services/mail/templates/password-reset.ts';
 
