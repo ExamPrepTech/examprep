@@ -11,12 +11,11 @@ import morgan from 'morgan';
 import '@/config/passport.ts';
 import authRoutes from '@/routes/auth.routes.ts';
 import contentRoutes from '@/routes/content.routes.ts';
-import { ENV } from '@/config/env.ts';
+import permissionRoutes from '@/routes/permission.routes.ts';
+import { ENV } from '@/config/environment.ts';
 import { mailService } from '@/services/mail/mail.service.ts';
 
 const app = express();
-const PORT = ENV.PORT;
-
 // Middleware
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
@@ -34,6 +33,7 @@ import testRoutes from '@/routes/test.routes.js';
 app.use('/api/auth', authRoutes);
 app.use('/api', contentRoutes);
 app.use('/api/tests', testRoutes);
+app.use('/api', permissionRoutes);
 
 // Error Handling
 import { errorHandler } from '@/middleware/error.middleware.ts';
@@ -51,8 +51,8 @@ mongoose
   .then(() => {
     console.log('connected to MongoDB');
     void mailService.verify();
-    app.listen(PORT, () => {
-      console.log(`Server is running on port ${PORT}`);
+    app.listen(ENV.PORT, () => {
+      console.log(`Server is running on port ${ENV.PORT}`);
     });
   })
   .catch((err) => {

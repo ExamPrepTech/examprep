@@ -6,7 +6,7 @@ import User, { type IUser } from '@/models/User.ts';
 import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt';
 import { v4 as uuidv4 } from 'uuid';
 import dotenv from 'dotenv';
-import { ENV } from '@/config/env.ts';
+import { ENV } from '@/config/environment.ts';
 dotenv.config();
 
 // environmental variables are loaded in index.ts but hoisted imports in ESM

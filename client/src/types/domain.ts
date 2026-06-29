@@ -11,6 +11,8 @@ export interface Space extends BaseEntity {
   icon?: string;
   subjectCount?: number;
   questionCount?: number;
+  isOwner?: boolean;
+  ownerName?: string;
 }
 
 export interface Subject extends BaseEntity {

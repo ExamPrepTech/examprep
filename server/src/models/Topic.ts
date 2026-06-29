@@ -8,6 +8,7 @@ export interface ITopic extends Document {
   title: string;
   slug: string;
   subjectId: mongoose.Types.ObjectId;
+  userId: mongoose.Types.ObjectId;
   position: number;
   icon: string;
   createdAt: Date;
@@ -18,9 +19,12 @@ const TopicSchema: Schema = new Schema({
   title: { type: String, required: true },
   slug: { type: String, required: true, index: true },
   subjectId: { type: Schema.Types.ObjectId, ref: 'Subject', required: true, index: true },
+  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
   position: { type: Number, default: 0 },
-  icon: { type: String, default: 'Hash' } // Default to Hash icon for topics
+  icon: { type: String, default: 'Hash' }
 }, { timestamps: true });
+
+TopicSchema.index({ userId: 1, subjectId: 1 });
 
 TopicSchema.pre("validate", async function () {
   if (this.isModified("title") || !this.slug) {

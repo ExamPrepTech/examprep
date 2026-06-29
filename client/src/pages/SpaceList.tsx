@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Edit2, Trash2, Loader2 } from 'lucide-react';
+import { Plus, Edit2, Trash2, Loader2, Share2 } from 'lucide-react';
 import { type Space } from '@/types/domain';
 import { useSpaceStore } from '@/store/spaceStore';
 import { Button } from '@/components/common/Button';
@@ -10,6 +10,7 @@ import { EmptyState } from '@/components/common/EmptyState';
 import { DynamicIcon, getDeterministicColor } from '@/components/UI/DynamicIcon';
 import { IconPicker } from '@/components/UI/IconPicker';
 import { TruncatedText } from '@/components/common/TruncatedText';
+import { ShareDialog } from '@/components/common/ShareDialog';
 
 export default function SpaceList() {
   const navigate = useNavigate();
@@ -19,6 +20,7 @@ export default function SpaceList() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [currentSpace, setCurrentSpace] = useState<Space | null>(null);
+  const [shareSpace, setShareSpace] = useState<Space | null>(null);
 
   // Form states
   const [formData, setFormData] = useState({ name: '', description: '', icon: 'Book' });
@@ -134,35 +136,46 @@ export default function SpaceList() {
                         </span>
 
                         {/* Hover View */}
-                        <div className="absolute top-0 right-0 flex items-center bg-secondary rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-sm border border-black/5">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-7 w-8 rounded-l-full rounded-r-none hover:bg-black/5"
-                            onClick={(e) => openEditModal(space, e)}
-                          >
-                            <Edit2 className="h-3.5 w-3.5" />
-                          </Button>
-                          <div className="w-px h-3 bg-black/10" />
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-7 w-8 rounded-r-full rounded-l-none text-destructive hover:text-destructive hover:bg-red-50"
-                            onClick={(e) => openDeleteModal(space, e)}
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </Button>
-                        </div>
+                        {space.isOwner !== false && (
+                          <div className="absolute top-0 right-0 flex items-center bg-secondary rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-sm border border-black/5">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-8 rounded-l-full rounded-r-none hover:bg-black/5"
+                              onClick={(e) => openEditModal(space, e)}
+                            >
+                              <Edit2 className="h-3.5 w-3.5" />
+                            </Button>
+                            <div className="w-px h-3 bg-black/10" />
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-8 rounded-none hover:bg-black/5"
+                              onClick={(e) => { e.stopPropagation(); setShareSpace(space); }}
+                            >
+                              <Share2 className="h-3.5 w-3.5" />
+                            </Button>
+                            <div className="w-px h-3 bg-black/10" />
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-8 rounded-r-full rounded-l-none text-destructive hover:text-destructive hover:bg-red-50"
+                              onClick={(e) => openDeleteModal(space, e)}
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
+                          </div>
+                        )}
                       </div>
                     </div>
 
                     <div>
-                      <TruncatedText
-                        as="h3"
-                        className="text-xl font-semibold mb-2 bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text"
-                      >
-                        {space.name}
-                      </TruncatedText>
+                        <TruncatedText
+                          as="h3"
+                          className="text-xl font-semibold mb-2 bg-gradient-to-br from-foreground to-foreground/80 bg-clip-text"
+                        >
+                          {space.name}
+                        </TruncatedText>
                       <TruncatedText
                         as="p"
                         lines={3}
@@ -172,6 +185,13 @@ export default function SpaceList() {
                         {space.description || 'No description provided.'}
                       </TruncatedText>
                     </div>
+                    {space.isOwner === false && (
+                      <div className="mt-auto flex justify-end pt-2">
+                        <span className="text-xs font-medium px-2.5 py-1.5 rounded-full bg-primary/10 text-primary inline-block">
+                          Shared{space.ownerName ? ` by ${space.ownerName}` : ''}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </Card>
               ))}
@@ -317,6 +337,14 @@ export default function SpaceList() {
           Are you sure you want to delete "{currentSpace?.name}"? All content inside will be permanently removed.
         </p>
       </Modal>
+
+      <ShareDialog
+        isOpen={!!shareSpace}
+        onClose={() => setShareSpace(null)}
+        resourceType="space"
+        resourceId={shareSpace?._id || ''}
+        resourceTitle={shareSpace?.name}
+      />
     </div>
   );
 }

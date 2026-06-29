@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Sun, Moon, LogOut, User, GraduationCap, ChevronDown } from 'lucide-react';
+import { Sun, Moon, LogOut, User, GraduationCap, ChevronDown, Share2 } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { useTheme } from '@/hooks/useTheme';
 import { Button } from '@/components/common/Button';
@@ -80,7 +80,10 @@ export function Navbar() {
             <div className="hidden md:flex items-center gap-1 mr-4">
               <NavLink to="/spaces">Spaces</NavLink>
               <NavLink to="/tests">Test Center</NavLink>
-
+              <NavLink to="/shared-with-me">
+                <Share2 className="w-4 h-4 inline mr-1" />
+                Shared
+              </NavLink>
             </div>
           )}
           <Button

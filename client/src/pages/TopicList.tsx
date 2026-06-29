@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Plus, Edit2, Trash2, Loader2 } from 'lucide-react';
+import { Plus, Edit2, Trash2, Loader2, Share2 } from 'lucide-react';
 
 import { type Topic } from '@/types/domain';
 import { useContentStore } from '@/store/contentStore';
@@ -14,6 +14,7 @@ import { Breadcrumbs } from '@/components/common/Breadcrumbs';
 import { DynamicIcon, getDeterministicColor } from '@/components/UI/DynamicIcon';
 import { IconPicker } from '@/components/UI/IconPicker';
 import { TruncatedText } from '@/components/common/TruncatedText';
+import { ShareDialog } from '@/components/common/ShareDialog';
 
 export default function TopicList() {
   const { spaceSlug, subjectSlug } = useParams();
@@ -40,6 +41,7 @@ export default function TopicList() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [targetTopic, setTargetTopic] = useState<Topic | null>(null);
+  const [shareTopic, setShareTopic] = useState<Topic | null>(null);
 
 
 
@@ -153,10 +155,12 @@ export default function TopicList() {
               </TruncatedText>
             </div>
             <div className="flex gap-2 shrink-0">
-              <Button onClick={openCreateModal}>
-                <Plus className="mr-2 h-4 w-4" />
-                Add Topic
-              </Button>
+              {currentSpace?.isOwner !== false && (
+                <Button onClick={openCreateModal}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Topic
+                </Button>
+              )}
             </div>
           </div>
         </div>
@@ -167,8 +171,8 @@ export default function TopicList() {
           {topics.length === 0 ? (
             <EmptyState
               title="No topics yet"
-              description="Create a topic to start adding content."
-              action={<Button onClick={openCreateModal}>Add Topic</Button>}
+              description={currentSpace?.isOwner !== false ? "Create a topic to start adding content." : "No topics in this subject yet."}
+              action={currentSpace?.isOwner !== false ? <Button onClick={openCreateModal}>Add Topic</Button> : undefined}
             />
           ) : (
             <div className="space-y-4">
@@ -197,27 +201,38 @@ export default function TopicList() {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-                    <div className="flex items-center bg-secondary/50 rounded-lg">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={(e) => openEditModal(topic, e)}
-                        className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                      >
-                        <Edit2 className="h-4 w-4" />
-                      </Button>
-                      <div className="w-px h-4 bg-border" />
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-                        onClick={(e) => openDeleteModal(topic, e)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                  {currentSpace?.isOwner !== false && (
+                    <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                      <div className="flex items-center bg-secondary/50 rounded-lg">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={(e) => openEditModal(topic, e)}
+                          className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                        >
+                          <Edit2 className="h-4 w-4" />
+                        </Button>
+                        <div className="w-px h-4 bg-border" />
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                          onClick={(e) => { e.stopPropagation(); setShareTopic(topic); }}
+                        >
+                          <Share2 className="h-4 w-4" />
+                        </Button>
+                        <div className="w-px h-4 bg-border" />
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                          onClick={(e) => openDeleteModal(topic, e)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -317,6 +332,14 @@ export default function TopicList() {
           Are you sure you want to delete "{targetTopic?.title}"?
         </p>
       </Modal>
+
+      <ShareDialog
+        isOpen={!!shareTopic}
+        onClose={() => setShareTopic(null)}
+        resourceType="topic"
+        resourceId={shareTopic?._id || ''}
+        resourceTitle={shareTopic?.title}
+      />
     </div>
   );
 }
